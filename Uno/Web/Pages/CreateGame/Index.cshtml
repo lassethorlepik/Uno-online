@@ -1,0 +1,60 @@
+@page
+@model Index
+@{
+    ViewData["Title"] = "Create Game";
+}
+
+<body style="background-color: black;color: white;">
+    <h5>Enter settings</h5>
+    <div class="row">
+        <div>
+            <form action="/CreateNewGame" method="GET">
+                <div>
+                    <label>
+                        Amount of wildcard sets<br><input asp-for="rules.WildCards" style="width: 50px;"/>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Amount of special card sets<br><input asp-for="rules.SpecialCards" style="width: 50px;"/>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Amount of number card sets<br><input asp-for="rules.NumberCards" style="width: 50px;"/>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Draw limit is one per turn<br><input asp-for="rules.DrawLimitIsOne" style="width: 25px;height: 25px;"/>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Plus 2 and 4 cards can be passed using stacking<br><input asp-for="rules.CanPassPlus2And4" style="width: 25px;height: 25px;"/>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Player names separated by a comma<br><input type="text" name="Names" value="Player1, Player2" style="width: 200px;"/>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Number of AI opponents<br><input type="number" name="AiCount" value="0" style="width: 50px;"/>
+                    </label>
+                </div>
+                <br>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+<style>
+    :root {
+      --bs-body-bg(black);
+      --bs-body(white);
+    }
+</style>

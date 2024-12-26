@@ -1,0 +1,88 @@
+@page
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Games";
+}
+<body style="background-color: black;color:white;overflow-x:hidden;background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('games.webp');background-position: center;background-repeat: no-repeat;background-size: cover;">
+<p>
+    <a href="./CreateGame" class="button">Start a new game</a>
+</p>
+
+<h1>Existing games:</h1>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            Game created:
+        </th>
+        <th>
+            Last updated:
+        </th>
+        <th>
+                    
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Game[0].State)
+        </th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Game) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedAtDt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedAtDt)
+            </td>
+            <td>
+                <form action="JoinAs" method="GET">
+                    <input type="hidden" id="GameId" name="GameId" value="@Html.DisplayFor(modelItem => item.Id)" />
+                    <input type="submit" value="Join" class="btn btn-primary"/>
+                </form>
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+</body>
+
+<style>
+    :root {
+      --bs-body-bg(black);
+      --bs-body(white);
+    }
+    th, td {
+        color: white;
+    }
+    a {
+        text-decoration: none;
+        color: #0d6efd;
+    }
+    a:hover {
+        color: white;
+    }
+    .button {
+      text-decoration: none;
+      color: white;
+      padding: 2px 6px 2px 6px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 5px solid #0d6efd;
+      background-color: #0d6efd;
+    }
+    
+    .button:hover {
+        border: 5px solid #0C62E2;
+        background-color: #0C62E2;
+        color: white;
+    }
+</style>

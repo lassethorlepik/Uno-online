@@ -1,0 +1,300 @@
+@page
+@using Domain
+@model Index
+@{
+    if (@Model.CurrentFullPlayer != null)
+    {
+        ViewData["Title"] = @Model.CurrentFullPlayer.Name + "'s turn";
+    }
+    else
+    {
+        ViewData["Title"] = "Game over";
+    }
+    
+}
+<html lang="" style="background-color: black;">
+<body style="overflow-x:hidden;background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('games.webp');background-position: center;background-repeat: no-repeat;background-size: cover;">
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @Model.ErrorMessage
+    </div>
+}
+<h2 class="text-light">Uno match</h2>
+<h5 class="text-light">Reload page in <span id="reload-label">-</span></h5>
+
+@if (!Model.Game!.gameover && @Model.CurrentFullPlayer != null)
+{
+
+    if (@Model.myTurn)
+    {
+        <h5 style="color: limegreen">YOUR TURN!</h5>
+    }
+    else
+    {
+        <h5 style="color: #0d6efd">@Model.Game!.state.CurrentPlayer.Name's turn</h5>
+    }
+    if (@Model.GetLast() is null)
+    {
+        string colorForPlayedCard = "black";
+        string symbolLast = "";
+        <div class="unoCardOutline" style="width: 118.9px;">
+            <div class="unoCard" style="background-color: @colorForPlayedCard;">
+                <span class="top_sym">@symbolLast</span>
+                <span class="mid_sym">@symbolLast</span>
+                <span class="bot_sym">@symbolLast</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        string colorForPlayedCard;
+        if (@Model.GetLast()!.Color == CardColor.Yellow)
+        {
+            colorForPlayedCard = "#FFBF00"; // better contrast for yellow
+        }
+        else
+        {
+            colorForPlayedCard = @Model.GetLast()!.Color.ToString();
+        }
+        string symbolLast = @Model.GetSymbol(@Model.GetLast()!);
+        <div class="unoCardOutline" style="width: 118.9px;">
+            <div class="unoCard" style="background-color: @colorForPlayedCard;">
+                <span class="top_sym">@symbolLast</span>
+                <span class="mid_sym">@symbolLast</span>
+                <span class="bot_sym">@symbolLast</span>
+            </div>
+        </div>
+    }
+    <br><br>
+    <div style="padding:20px;border: 3px solid white;border-radius: 10px;width: 200px;position: absolute;top: 8%;right: 3%;">
+    @if (!@Model.myTurn || @Model.Game.state is {CurrentPlayerDrew: true,UsedRuleSet.DrawLimitIsOne: true}) // red text if you cant draw
+    {
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId" style="text-decoration: none;background-color: red;border: 5px solid red;" class="button">Draw a card</a>
+    }
+    else
+    {
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=draw" style="text-decoration: none;background-color: green;border: 5px solid green;" class="button">Draw a card</a>
+    }
+    
+    @if (@Model.myTurn && !Model.Game.state.CurrentPlayerCalledUno)
+    {
+        <br><br>
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=uno" style="text-decoration: none;background-color: green;border: 5px solid green;" class="button">Call Uno!</a>
+    }
+    else
+    {
+        <br><br>
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId" style="text-decoration: none;background-color: red;border: 5px solid red;" class="button">Call Uno!</a>
+    }
+    
+    @if (@Model.myTurn && @Model.Game.state is {CurrentPlayerDrew: true,UsedRuleSet.DrawLimitIsOne: true})
+    {
+        <br><br>
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=end" style="text-decoration: none;background-color: green;border: 5px solid green;" class="button">End turn</a> 
+    }
+    else
+    {
+        <br><br>
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId" style="text-decoration: none;background-color: red;border: 5px solid red;" class="button">End turn</a>
+    }
+    
+    <br>
+    <br>
+    <span style="color:white;">Preferences:</span>
+    <br><br>
+    <span style="color:white;">Stacking</span>
+    @if (@Model.CurrentFullPlayer.Stacking)
+    {
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=stacking" style="text-decoration: none;background-color: green;border: 5px solid green;" class="button">On</a>
+    }
+    else
+    {
+        <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=stacking" style="text-decoration: none;background-color: red;border: 5px solid red;" class="button">Off</a>
+    }
+    <br><br>
+    <span style="color:white;">Wildcard: </span>
+    @{
+        string prefBtnColor;
+        string prefBtnColorText;
+        if (@Model.CurrentFullPlayer.PrefColor == "Yellow")
+        {
+            prefBtnColor = "#FFBF00";
+            prefBtnColorText = "Yellow";
+        }
+        else
+        {
+            prefBtnColor = @Model.CurrentFullPlayer.PrefColor;
+            prefBtnColorText = prefBtnColor;
+        }
+    }
+    <a class="button" href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=prefColor" style="text-decoration: none;background-color: @prefBtnColor;border: 5px solid @prefBtnColor;" class="button">@prefBtnColorText</a>
+    <br><br>
+    <span style="color:white;">Swap: </span>
+    @{
+    int swapIndex = @Model.CurrentFullPlayer.PrefSwap;
+    if (@Model.Game.state.Players.Count == 1) {
+        swapIndex = -1; // force player choice to -1, if only one player
+    }
+    var name = swapIndex == -1 ? @Model.CurrentFullPlayer.Name : @Model.Game.state.Players.Where(p => p.Id != @Model.CurrentFullPlayer!.Id).ToList()[swapIndex].Name;
+    }
+    <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=prefSwap" style="text-decoration: none;background-color:black;border: 5px solid black;" class="button">@name</a>
+    <br>
+    </div>
+    <br>
+
+    <div class="table">
+        @{int i = 0;}
+        @foreach (Card card in @Model.CurrentFullPlayer!.Hand)
+        {
+            string color;
+            if (card.Color.ToString() == "Wild")
+            {
+                color = "background-color: black";
+                @* color = "background: linear-gradient(in hsl longer hue 45deg, red 0 0)"; *@
+            }
+            else
+            {
+                if (card.Color == CardColor.Yellow)
+                {
+                    color = "background-color: #FFBF00"; // better contrast for yellow
+                }
+                else
+                {
+                    color = "background-color: " + card.Color; 
+                }
+            }
+            string symbol = @Model.GetSymbol(card);
+            <div class="unoCardOutline">
+                <a href="?GameId=@Model.GameId&PlayerId=@Model.PlayerId&Action=@i" style="text-decoration: none;">
+                    <div class="unoCard hoverable" style="@color;">
+                        <span class="top_sym">@symbol</span>
+                        <span class="mid_sym">@symbol</span>
+                        <span class="bot_sym">@symbol</span>
+                    </div>
+                </a>
+            </div>
+            i++;
+        }
+    </div>
+}
+else
+{
+    <br>
+    <h3 style="color: red">GAME OVER</h3>
+    <br>
+    <h3 style="color: yellow">LEADERBOARD</h3>
+    int pCounter = 1;
+    @foreach (Player player in @Model.Game.state.Winners)
+    {
+        <h5 style="color: yellow">@pCounter. @player</h5>
+        pCounter++;
+    }
+}
+
+
+
+</body>
+
+@section Scripts {
+    <script>
+        let timerValue = 3;
+        let timerLabel = document.querySelector("#reload-label");
+        
+        setInterval(() => {
+            timerValue--;
+            timerLabel.innerHTML = timerValue.toString();
+            if (timerValue<=0) {
+                window.location.reload();
+            }
+        }, 1000);
+    </script>
+}
+<style>
+    :root {
+      --bs-body-bg(black);
+      --bs-body(white);
+    }
+
+    .top_sym {
+        font-size: 1.25rem;
+        z-index: 5;
+        color:white;
+    }
+    
+    .bot_sym {
+        font-size: 1.25rem;
+        z-index: 5;
+        color:white;
+    }
+    
+    .mid_sym {
+        font-size: 2.5rem;
+        place-self: center;
+        color:white;
+        z-index: 2;
+    }
+    
+    .bot_sym {
+        transform: rotate(180deg);
+        color:white;
+
+    }
+    
+    .unoCard {
+        height: 150px;
+        aspect-ratio: 2/3;
+        border-radius: 10px;
+        padding: 0.25rem 0.5rem;
+        display: grid;
+        background-position: center;
+        grid-template-rows: 1fr 3fr 1fr;
+        z-index: 1;
+        -webkit-box-shadow: 0 1px 1px #8b8b8b;
+        box-shadow: 0 10px 30px -5px #0000004d;
+        transition: box-shadow .5s;
+        will-change: transform;
+        transform-origin: center;
+        scale: 1.05;
+    }
+    
+    .hoverable:hover {
+        cursor: pointer;
+    }
+    
+    .unoCardOutline {
+        border: 10px solid white;
+        border-radius: 10px;
+        margin: 10px;
+        min-width: 0;
+        min-height: 0;
+    }
+    
+    .table {
+        width: 70vw;
+        height: 70vh;
+        /*background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('table.jpg');*/
+        background-position: center;
+        background-repeat: repeat;
+        display:flex;
+        flex-direction:row;justify-content: flex-start;
+        flex-wrap:wrap;align-content: flex-start;
+        /*box-shadow: inset 0 0 50px #000000, inset 0 0 40px #000000, inset 0 0 30px #000000, inset 0 0 20px #000000, inset 0 0 10px #000000;*/
+    }
+    
+    .button {
+      text-decoration: none;
+      color: white;
+      padding: 2px 6px 2px 6px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .button:hover {
+        border: 5px solid white!important;
+        background-color: white!important;
+        color: black!important;
+    }
+    
+</style>
+</html>

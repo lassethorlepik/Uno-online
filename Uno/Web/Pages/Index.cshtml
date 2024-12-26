@@ -1,0 +1,65 @@
+﻿@page
+@model WebApp.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<body style="background-image: url('wallpaper.jpg');background-position: center;background-repeat: no-repeat;background-size: cover;background-color: black;" class="zoom">
+<h3 style="color: white">@Model.Count lobbies online</h3>
+<br>
+<div class="row-item">
+    <img src="start.png" style="width:70px;height: 70px;padding: 10px;" class="zoomimg"><a href="./CreateGame" class="hoverable">New game</a>
+</div>
+
+<div class="row-item">
+    <img src="play.png" style="width:70px;height: 70px;padding: 10px;" class="zoomimg"><a href="./Games" class="hoverable">Join existing</a>
+</div>
+<audio loop id="theme">
+    <source src="uno_loop.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+<audio autoplay>
+    <source src="uno_start.mp3" type="audio/mpeg">
+</audio>
+</body>
+
+<style>
+@@-webkit-keyframes zoom-a {
+	0% { background-size: 100% auto; }
+	100% { background-size: 103% auto; }
+}
+@@-moz-keyframes zoom-a {
+	0% { background-size: 100% auto; }
+	100% { background-size: 103% auto; }
+}
+@@-o-keyframes zoom-a {
+	0% { background-size: 100% auto; }
+	100% { background-size: 103% auto; }
+}
+@@keyframes zoom-a {
+	0% { background-size: 100% auto; }
+	100% { background-size: 103% auto; }
+}
+.zoom {
+  -webkit-animation: zoom-a 0.75s ease-in-out infinite alternate; /* Safari 4+ */
+  -moz-animation:    zoom-a 0.75s ease-in-out infinite alternate; /* Fx 5+ */
+  -o-animation:      zoom-a 0.75s ease-in-out infinite alternate; /* Opera 12+ */
+  animation:         zoom-a 0.75s ease-in-out infinite alternate; /* IE 10+, Fx 29+ */
+}
+.hoverable {
+    color: white;
+    text-decoration: none;
+}
+.hoverable:hover {
+    color: lightgreen;
+}
+</style>
+
+<script>
+window.onload = function() { // when the page loads
+  setTimeout(play, 2500);
+}  
+play = function() { // play the audio
+  document.getElementById("theme").play(); 
+}
+</script>

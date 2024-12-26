@@ -1,0 +1,40 @@
+@page
+@using Domain
+@model Index
+@{
+    ViewData["Title"] = "Join Game";
+}
+
+<body style="background-color: black;color: white;">
+<h5>Join as:</h5>
+@foreach (Player player in @Model.Game!.state.Players)
+{
+    @if (!player.IsAi)
+    {
+        <div class="row">
+            <form action="Play" method="GET">
+                <input type="hidden" id="GameId" name="GameId" value="@Model.Game.state.Id" />
+                <input type="hidden" id="PlayerId" name="PlayerId" value="@player.Id" />
+                <input type="submit" value="@player.Name" class="btn btn-primary"/>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <form action="Play" method="GET">
+                <input type="hidden" id="GameId" name="GameId" value="@Model.Game.state.Id" />
+                <input type="hidden" id="PlayerId" name="PlayerId" value="@player.Id" />
+                <input type="submit" value="Spectate CPU: @player.Name" class="btn btn-primary"/>
+            </form>
+        </div>
+    }
+    <br>
+}
+</body>
+<style>
+    :root {
+      --bs-body-bg(black);
+      --bs-body(white);
+    }
+</style>
